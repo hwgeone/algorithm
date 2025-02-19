@@ -1,0 +1,66 @@
+﻿#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+#include <stdbool.h>
+#include <math.h>
+
+struct TreeNode {
+	int val;
+	struct TreeNode* left;
+	struct TreeNode* right;
+};
+
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     struct TreeNode *left;
+ *     struct TreeNode *right;
+ * };
+ */
+ /**
+  * Note: The returned array must be malloced, assume caller calls free().
+  */
+double* averageOfLevels(struct TreeNode* root, int* returnSize) {
+	// Edge case: if the tree is empty
+	if (!root) {
+		*returnSize = 0;
+		return NULL;
+	}
+
+	struct TreeNode** queue = (struct TreeNode**)malloc(10000 * sizeof(struct TreeNode*));
+	double* result = (double*)malloc(10000 * sizeof(double));
+	int front = 0, rear = 0, levelCount, resultIndex = 0;
+	double sum;
+
+	//进队列rear++ 出队列front++ 
+	//BST算法：队列+while 先左再右
+	queue[rear++] = root;
+	//循环树的每一层
+	while (front < rear)
+	{
+	    sum = 0;
+	    levelCount = rear - front;
+
+	    //求这层的和
+	    for (int i = 0;i<levelCount; i++)
+	    {
+	        //当前在队列遍历的元素
+	        struct TreeNode* currentNode = queue[front++];
+	        sum += currentNode->val;
+
+	        //把当前遍历的元素的左右节点加入到队里中
+	        if (currentNode->left)
+	            queue[rear++] = currentNode->left;
+	        if (currentNode->right)
+	            queue[rear++] = currentNode->right;
+	    }
+
+	    result[resultIndex] = sum / levelCount;
+	    resultIndex++;
+	}
+
+	*returnSize = resultIndex;
+	free(queue);
+	return result;
+}

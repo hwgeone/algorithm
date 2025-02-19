@@ -1,0 +1,41 @@
+﻿#include<stdlib.h>
+#include <string.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <math.h>
+
+//n相当于树的宽度，k相当于树的深度。
+//回溯相当于深度优先遍历
+void backtrack(int n, int k, int** res, int* resIndex,int* oneCombine,int oneIndex,int loopIndex)
+{
+	//oneIndex 当前处理的组合的对应的元素的下标
+	if (oneIndex == k)
+	{
+		int* tmp = (int*)malloc(sizeof(int) * k);
+		memcpy(tmp, oneCombine, sizeof(int) * k);
+		res[*resIndex] = tmp;
+		(*resIndex)++;
+		return;
+	}
+
+	//loopIndex 当前树的宽度的索引
+	for (int i = loopIndex; i < n; i++)
+	{
+		oneCombine[oneIndex++] = i + 1;
+		backtrack(n,k,res,resIndex,oneCombine,oneIndex, i+1);
+		oneIndex--;
+	}
+}
+
+int** combine(int n, int k, int* returnSize, int** returnColumnSizes) {
+	int** res = (int**)malloc(sizeof(int*)* 200001);
+	int* oneCombine = (int*)malloc(sizeof(int) * k);
+	*returnSize = 0;
+	
+	backtrack(n, k, res, returnSize, oneCombine, 0,0);
+	*returnColumnSizes = (int*)malloc(sizeof(int) * (*returnSize));
+	for (int i = 0; i < *returnSize; i++) {
+		(*returnColumnSizes)[i] = k;
+	}
+	return res;
+}
