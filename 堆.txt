@@ -1,0 +1,169 @@
+﻿若堆中某个节点的值总是不小于其父节点的值，叫最小堆
+若堆中某个节点的值总是不大于其父节点的值，叫最大堆
+堆总是一棵完全二叉树。
+
+（1）利用最大堆和最小堆实现堆排序，
+如按升序排序n个数，采用最小堆，堆容量为n，当堆满后，堆顶为最小值，
+将其与末尾元素进行交换，此时末尾就为最小值，然后
+将剩余n-1个元素重新构造成一个堆，这样会得到n个元素的次小值。
+如此反复执行，便能得到一个有序序列了
+；同理采用最大堆，可实现降序排序
+
+（2）利用最大堆和最小堆实现Top K问题，
+
+　　　　1）计算数组最大的K个数，可使用最小堆，先构建K大小的最小堆，
+新元素与堆顶元素比较，如果大于堆顶元素，则删除堆顶，加入新元素；否则最小堆不变；
+　　　　2）计算数组最小的K个数，可使用最大堆，同理，如果新元素比堆顶小，
+则删除堆顶，加入新元素；否则最大堆不变。
+
+//堆 模版
+
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+#include<stdbool.h>
+#include<math.h>
+
+struct HeapElement {
+	int A;
+	int B;
+};
+
+//堆中某个节点的值总是不大于或不小于其父节点的值；
+//堆总是一棵完全二叉树。
+struct Heap {
+	struct HeapElement** heap;
+	int heapSize;
+	bool (*cmp)(struct HeapElement*, struct HeapElement*);
+};
+
+void init(struct Heap* obj, int n, bool (*cmp)(struct HeapElement* a, struct HeapElement* b)) {
+	obj->heap = (struct HeapElement**)malloc(sizeof(struct HeapElement*) * (n + 1));
+	obj->heapSize = 0;
+	obj->cmp = cmp;
+}
+
+//比较逻辑，需要根据实际情况自己写
+//计算数组最大的K个数，可使用最小堆
+//计算数组最小的K个数，可使用最大堆
+//最大堆是a<b  最小堆是a>b
+bool cmp(struct HeapElement* a, struct HeapElement* b) {
+	double first = a->A * 1.0 / a->B;
+	double second = b->A * 1.0 / b->B;
+	return first < second;
+}
+
+void swap(struct HeapElement* a, struct HeapElement* b) {
+	struct HeapElement tmp = *a;
+	*a = *b, * b = tmp;
+}
+
+//假设树的节点个数为n，以1为下标开始编号，直到n结束。对于节点i，其父节点为i/2；
+//左孩子节点为i*2，右孩子节点为i*2+1。最后一个节点的下标为n，其父节点的下标为n/2。
+void push(struct Heap* obj, struct HeapElement* x) {
+	//p-》最后一个叶子节点；q-》p的父节点
+	int p = ++(obj->heapSize), q = p >> 1;
+	obj->heap[p] = x;
+	while (q) {
+		//q<p 
+		if (!obj->cmp(obj->heap[q], obj->heap[p])) {
+			break;
+		}
+		//q>=p 向上翻
+		swap(obj->heap[q], obj->heap[p]);
+		p = q, q = p >> 1;
+	}
+}
+
+void pop(struct Heap* obj) {
+	//把最后的元素放到根节点
+	swap(obj->heap[1], obj->heap[(obj->heapSize)--]);
+	int p = 1, q = p << 1;
+	while (q <= obj->heapSize) {
+		//有右子节点
+		if (q + 1 <= obj->heapSize) {
+			//左子节点 > 右子节点
+			if (obj->cmp(obj->heap[q], obj->heap[q + 1])) {
+				//比较右子节点
+				q++;
+			}
+		}
+
+		//p<=q
+		if (!obj->cmp(obj->heap[p], obj->heap[q])) {
+			break;
+		}
+
+		//p > q
+		swap(obj->heap[q], obj->heap[p]);
+		p = q, q = p << 1;
+	}
+}
+
+struct HeapElement* top(struct Heap* obj) {
+	return obj->heap[1];
+}
+
+typedef struct {
+	struct Heap* heap;
+	int maxSize;
+} KthLargest;
+
+struct HeapElement* kthLargestAdd(KthLargest* obj, struct HeapElement* val) {
+	push(obj->heap, val);
+	if (obj->heap->heapSize > obj->maxSize) {
+		pop(obj->heap);
+	}
+	return top(obj->heap);
+}
+
+KthLargest* kthLargestCreate(int k, struct HeapElement** nums, int numsSize) {
+	KthLargest* ret = (KthLargest*)malloc(sizeof(KthLargest));
+	ret->heap = (struct Heap*)malloc(sizeof(struct Heap));
+	init(ret->heap, k + 1, cmp);
+	ret->maxSize = k;
+	for (int i = 0; i < numsSize; i++) {
+		struct HeapElement* heapEle = kthLargestAdd(ret, nums[i]);
+	}
+	return ret;
+}
+
+
+
+void kthLargestFree(KthLargest* obj) {
+	free(obj->heap->heap);
+	free(obj->heap);
+	free(obj);
+}
+
+int* kthSmallestPrimeFraction(int* arr, int arrSize, int k, int* returnSize) {
+
+	int count = 0;
+	struct HeapElement** lopp = (struct HeapElement**)malloc(sizeof(struct HeapElement*) * (arrSize * arrSize));
+
+	for (int i = 0; i < arrSize; i++)
+	{
+		for (int j = i + 1; j < arrSize; j++)
+		{
+			lopp[count] = (struct HeapElement*)malloc(sizeof(struct HeapElement));
+			lopp[count]->A = arr[i];
+			lopp[count]->B = arr[j];
+
+			count++;
+		}
+	}
+
+	KthLargest* kl = kthLargestCreate(k, lopp, count);
+
+	int* res = (int*)malloc(sizeof(int) * 2);
+	*returnSize = 2;
+
+	struct HeapElement* xxx = top(kl->heap);
+	res[0] = xxx->A;
+	res[1] = xxx->B;
+
+	free(lopp);
+	kthLargestFree(kl);
+	return res;
+}
+

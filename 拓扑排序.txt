@@ -1,0 +1,77 @@
+﻿https://mp.weixin.qq.com/s?__biz=MzU4NDE3MTEyMA==&mid=2247489706&idx=1&sn=771cd807f39d1ca545640c0ef7e5baec
+拓扑排序作用：有向无环图
+对于有向图的拓扑排序，我们可以使用如下思路输出拓扑序（BFS 方式）：
+
+1.起始时，将所有入度为 0的节点进行入队（入度为 0，说明没有边指向这些节点，
+将它们放到拓扑排序的首部，不会违反拓扑序定义）；
+2.从队列中进行节点出队操作，出队序列就是对应我们输出的拓扑序。
+对于当前弹出的节点 x，遍历 x 的所有出度，即遍历所有由 x 直接指向的节点 y，
+对 y 做入度减一操作（因为 x 节点已经从队列中弹出，被添加到拓扑序中，
+等价于从 x 节点从有向图中被移除，相应的由 x 发出的边也应当被删除，
+带来的影响是与 x 相连的节点 yyy 的入度减一）；
+3.对 y 进行入度减一之后，检查 y 的入度是否为 0，如果为 0 则将 y 入队
+（当 y 的入度为 0，说明有向图中在 y 前面的所有的节点均被添加到拓扑序中，
+此时 y 可以作为拓扑序的某个片段的首部被添加，而不是违反拓扑序的定义）；
+循环流程 2、3 直到队列为空。
+
+
+---------------------------------------------------------------------
+//模板
+int* eventualSafeNodes(int** graph, int graphSize, int* graphColSize, int* returnSize) {
+    int n = graphSize;
+    int* rg[n];
+    int rgCol[n];
+    memset(rgCol, 0, sizeof(rgCol));
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < graphColSize[i]; j++) {
+            rgCol[graph[i][j]]++;//出度+1
+        }
+    }
+    for (int i = 0; i < n; i++) {
+        rg[i] = malloc(sizeof(int) * rgCol[i]);
+        rgCol[i] = 0;
+    }
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < graphColSize[i]; j++) {
+            //原先有多少个入度，现在就有多少个出度
+            rg[graph[i][j]][rgCol[graph[i][j]]++] = i;
+        }
+    }
+
+    //节点入度表
+    int inDeg[n];
+    memcpy(inDeg, graphColSize, sizeof(int) * n);
+
+    int que[10000];
+    int left = 0, right = 0;
+    for (int i = 0; i < n; ++i) {
+        //所有入度为0的节点入队
+        if (inDeg[i] == 0) {
+            que[right++] = i;
+        }
+    }
+    //    a b c  d
+    while (left < right) {
+        //取出队首元素
+        int y = que[left++];
+        //遍历其邻接节点
+        for (int i = 0; i < rgCol[y]; i++) {
+            //邻接节点的入度减1，后如果=0
+            if (--inDeg[rg[y][i]] == 0) {
+                //邻接节点入队
+                que[right++] = rg[y][i];
+            }
+        }
+    }
+
+    int* ans = (int*)malloc(sizeof(int) * n);
+    *returnSize = 0;
+    for (int i = 0; i < n; ++i) {
+        //所有入度为0的作为返回元素
+        if (inDeg[i] == 0) {
+            ans[(*returnSize)++] = i;
+        }
+    }
+    return ans;
+}
+

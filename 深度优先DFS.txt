@@ -1,0 +1,61 @@
+﻿//DFS是一种递归
+
+int** visis;
+int dirs[4][2] = { {0, 1}, {0, -1}, {1, 0}, {-1, 0} };
+
+void dfs(int** grid, int m, int n, int row, int col, int* area)
+{
+	if (grid[row][col] == 0)
+		return;
+	if (visis[row][col] == 1)
+		return;
+
+	(*area)++;
+	visis[row][col] = 1;
+
+	for (int i = 0; i < 4; i++)
+	{
+		int nextRow = row + dirs[i][0];
+		int nextCol = col + dirs[i][1];
+
+		if (nextRow < 0 || nextRow >= m || nextCol < 0 || nextCol >= n)
+			continue;
+
+		dfs(grid, m, n, nextRow, nextCol, area);
+	}
+}
+
+int maxAreaOfIsland(int** grid, int gridSize, int* gridColSize) {
+	int m = gridSize;
+	int n = gridColSize[0];
+	visis = (int**)malloc(sizeof(int*) * m);
+	for (int i = 0; i < m; i++)
+	{
+		visis[i] = (int*)calloc(n, sizeof(int));
+	}
+	int max = 0;
+	for (int i = 0; i < m; i++)
+	{
+		for (int j = 0; j < n; j++)
+		{
+			if (grid[i][j] == 0)
+				continue;
+			if (visis[i][j] == 1)
+				continue;
+
+			int area = 0;
+			dfs(grid, m, n, i, j, &area);
+
+			max = fmax(max, area);
+		}
+	}
+
+	for (int i = 0; i < m; i++)
+	{
+		free(visis[i]);
+	}
+	free(visis);
+
+	return max;
+}
+

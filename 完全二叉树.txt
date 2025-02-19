@@ -1,0 +1,14 @@
+﻿
+完全二叉树
+	特点
+	除了最后一层外，其他层都是满的，而且最后一层的结点都靠左排列
+
+	//i下标从0开始，对于i个元素
+	parent=（child-1）/2
+	leftchild=parent*2+1
+	rightchild=parent*2+2
+
+	//i下标从1开始，对于i个元素,
+	parent= child/2
+	leftchild=parent*2
+	rightchild=parent*2+1

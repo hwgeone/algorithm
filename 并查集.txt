@@ -1,0 +1,76 @@
+﻿并查集的一些使用tips:
+
+    一般不会将并查集使用得太复杂，内部结构如果过于复杂，也难以维护
+    只负责维护连通性
+    存在区间合并的题干，应当考虑使用并查集
+    如果题干是拆分连通分量，反向思维，考虑逆向使用并查集
+
+------------------------------------------------------------------------
+//C 模版
+
+//找到帮派的老大
+int Find(int* parent, int index) {
+	if (parent[index] != index) {
+		//路径压缩
+		//父节点设为根节点
+		parent[index] = Find(parent, parent[index]);
+	}
+	//返回父节点
+	return parent[index];
+}
+
+//帮派合并
+//尝试把两个不相交的集合合并为一个集合
+//合并操作也是很简单的，先找到两个集合的代表元素，然后将前者的父节点设为后者即可。
+//当然也可以将后者的父节点设为前者，这里暂时不重要。
+void Union(int* parent, int index1, int index2) {
+	//注释的代码也行
+	//parent[Find(parent, index2)] = Find(parent, index1);
+	parent[Find(parent, index1)] = Find(parent, index2);
+}
+
+//是否是一个帮派的
+//两个节点是否在一个集合中
+int isConnected(int* parent,int a, int b)
+{
+	return Find(parent,a) == findRoot(parent,b);
+}
+
+------------------------------------------------------------------------
+
+// 注意：使用该代码，并不能使得所有的元素都直接指向根节点，仍然存在间接指向
+class Djset {
+public:
+    vector<int> parent;  // 记录节点的根
+    vector<int> rank;    // 记录根节点的深度（用于优化）
+    int count;           // 记录并查集的数量,某些情况下该成员非必要
+    Djset(int n): parent(vector<int>(n)), rank(vector<int>(n)), count(n) {
+        for (int i = 0; i < n; i++) {
+            parent[i] = i;
+        }
+    }
+    
+    int find(int x) {
+        // 压缩方式：直接指向根节点
+        if (x != parent[x]) {
+            parent[x] = find(parent[x]);
+        }
+        return parent[x];
+    }
+    
+    void merge(int x, int y) {
+        // 找到根节点
+        int rootx = find(x);
+        int rooty = find(y);
+        if (rootx != rooty) {
+            // 按秩合并
+            if (rank[rootx] < rank[rooty]) {
+                swap(rootx, rooty);
+            }
+            parent[rooty] = rootx;
+            count--;
+            // 如果秩相等，将父节点rootx秩 + 1
+            if (rank[rootx] == rank[rooty]) rank[rootx] += 1;
+        }
+    }
+};

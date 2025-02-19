@@ -1,0 +1,63 @@
+﻿--------------------------------------------
+key是整数 模版
+
+struct HashTable {
+    int key, val;
+    UT_hash_handle hh;
+};
+
+ struct HashTable* hashTable = NULL;
+
+    for (int i = 0; i < m; i++) {
+	    struct HashTable* tmp;
+        HASH_FIND_INT(hashTable, &remainder, tmp);
+        if (tmp != NULL) {
+           
+        }
+        else {
+            tmp = (struct HashTable*)malloc(sizeof(struct HashTable));
+            tmp->key = remainder, tmp->val = i;
+            HASH_ADD_INT(hashTable, key, tmp);
+        }
+    }
+
+    struct HashTable* cur = NULL, * next = NULL;
+    HASH_ITER(hh, hashTable, cur, next) {
+        
+    }
+
+-------------------------------------
+key是字符串 模版
+
+struct hash {
+	char* key;
+	int repeatCount;
+	UT_hash_handle hh;
+};
+
+struct hash* hashTable = NULL;
+for (int i = 0; i < m; i++) {
+	struct hash* h;
+
+	//查找当前哈希表中有没有重复值。
+	//当键值为字符串时，具体要使用那个函数取决于结构体中的键值为字符串数组还是字符串指针。
+	//这一点很重要。当结构体中的键值为字符串数组时，使用HASH_ADD_STR。
+	//键值为字符串指针时使用HASH_ADD_KEYPTR。接下来给出两个例子参考。
+	HASH_FIND_STR(hashTable, string, h);
+
+	if (h)
+	{
+		(h->repeatCount)++;
+	}
+	else {
+		h = (struct hash*)malloc(sizeof(struct hash));
+		h->key = string;
+		h->repeatCount = 1;
+		HASH_ADD_KEYPTR(hh, hashTable, key, 10, h);
+	}
+}
+
+struct hash* cur = NULL, * next = NULL;
+HASH_ITER(hh, hashTable, cur, next) {
+	
+}

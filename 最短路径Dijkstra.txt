@@ -1,0 +1,38 @@
+﻿// 邻接矩阵数组：w[a][b] = c 代表从 a 到 b 有权重为 c 的边
+int w[110][110];
+// dist[x] = y 代表从「源点 k/起点」到 x 的最短距离为 y
+int dist[110];
+// 记录哪些点已经被更新过
+bool vis[110];
+//代表距离无穷大
+int INF = 0x3f3f3f3f;
+
+void dijkstra(int n,int k) {
+    // 起始先将所有的点标记为「未更新」和「距离为正无穷」
+    for (int i = 0; i < 110; i++)
+    {
+        dist[i] = INF;
+        vis[i] = false;
+    }
+
+    // 从k点出发
+    // 只有起点最短距离为 0
+    dist[k] = 0;
+    // 迭代 n 次，每次迭代，相当于从起点k向外蔓延
+    int loopCount = n;
+    while (loopCount)
+    {
+        // 每次找到「最短距离最小」且「未被更新」的点 t
+        int t = -1;
+        for (int i = 1; i <= n; i++) {
+            if (!vis[i] && (t == -1 || dist[i] < dist[t])) t = i;
+        }
+        // 标记点 t 为已更新
+        vis[t] = true;
+        // 用点 t 的「最小距离」更新其他点
+        for (int i = 1; i <= n; i++) {
+            dist[i] = fmin(dist[i], dist[t] + w[t][i]);
+        }
+        loopCount--;
+    }
+}
